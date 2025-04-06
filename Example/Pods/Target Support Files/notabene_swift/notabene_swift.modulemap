@@ -1,0 +1,6 @@
+framework module notabene_swift {
+  umbrella header "notabene_swift-umbrella.h"
+
+  export *
+  module * { export * }
+}

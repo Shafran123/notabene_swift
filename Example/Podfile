@@ -1,0 +1,12 @@
+use_frameworks!
+
+platform :ios, '14.0'
+
+target 'notabene_swift_Example' do
+  pod 'notabene_swift', :path => '../'
+
+  target 'notabene_swift_Tests' do
+    inherit! :search_paths
+
+  end
+end

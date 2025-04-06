@@ -1,0 +1,16 @@
+PODS:
+  - notabene_swift (0.1.0)
+
+DEPENDENCIES:
+  - notabene_swift (from `../`)
+
+EXTERNAL SOURCES:
+  notabene_swift:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  notabene_swift: 48d005b63163691aebcdba2c2bc93c9bed603b39
+
+PODFILE CHECKSUM: 172dccf626a08acfd2f7ee9cffdacc60fd0c25b3
+
+COCOAPODS: 1.15.0
