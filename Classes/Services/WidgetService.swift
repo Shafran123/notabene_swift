@@ -10,7 +10,7 @@ internal final class WidgetService {
     
     /// Network service for fetching widget data (can be expanded as needed)
     func validateTransaction(
-        transaction: TransactionData,
+        transaction: TransactionData_NT,
         authToken: String,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
