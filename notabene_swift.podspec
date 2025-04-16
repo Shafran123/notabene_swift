@@ -22,11 +22,11 @@ NotaBeneSwift provides a clean API for integrating the Notabene widget into iOS 
 It handles configuration, presentation, and communication with the widget.
                        DESC
 
-  s.homepage         = 'https://github.com/12469262/notabene_swift'
+  s.homepage         = 'https://github.com/Shafran123/notabene_swift'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { '12469262' => 'mshafran13@gmail.com' }
-  s.source           = { :git => 'https://github.com/12469262/notabene_swift.git', :tag => s.version.to_s }
+  s.author           = { 'Shafran123' => 'mshafran13@gmail.com' }
+  s.source           = { :git => 'https://github.com/Shafran123/notabene_swift', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '14.0'
