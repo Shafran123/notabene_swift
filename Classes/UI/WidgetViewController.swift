@@ -12,10 +12,10 @@ internal final class WidgetViewController: UIViewController {
     private let configuration: NotaBeneConfiguration
     
     /// Current transaction data
-    private var currentTransaction: TransactionData?
+    private var currentTransaction: TransactionData_NT?
     
     /// Called when the validation state changes
-    var onValidStateChange: ((Bool, [String: Any]?) -> Void)?
+    var onValidStateChange: ((Bool, Any?) -> Void)?
     
     /// Add this property to track if the webView is ready for JavaScript execution
     private var isWebViewReady = false
@@ -69,7 +69,9 @@ internal final class WidgetViewController: UIViewController {
         let script = WKUserScript(
             source: """
             window.notabeneNativeCallback = function(data) {
-                window.webkit.messageHandlers.notabeneCallback.postMessage(data);
+                window.webkit.messageHandlers.notabeneCallback.postMessage(
+                              JSON.stringify(data)
+            );
             }
             """,
             injectionTime: .atDocumentStart,
@@ -86,7 +88,13 @@ internal final class WidgetViewController: UIViewController {
         print("NotaBene: Loading widget HTML content")
         // Generate HTML with proper configuration
         let html = generateWidgetHTML()
-        webView.loadHTMLString(html, baseURL: nil)
+        if #available(iOS 16.4, *) {
+            webView.isInspectable = true
+        } else {
+            // Fallback on earlier versions
+        }
+        let baseURL = URL(string: "https://beta-widget.notabene.id")
+        webView.loadHTMLString(html, baseURL: baseURL)
     }
     
     /// Generate the HTML content for the widget
@@ -113,7 +121,19 @@ internal final class WidgetViewController: UIViewController {
                 vaspDID: '\(configuration.vaspDID)',
                 container: '#container',
                 authToken: '\(configuration.authToken)',
-                dictionary: \(dictionaryString),
+                dictionary:{
+                
+                },
+                theme: {
+                  mode: '\(configuration.theme)',
+                  // primaryColor: '\(configuration.primaryColor)'
+                  // You can also customize other theme elements if needed:
+                  // secondaryColor: '#yourColor',
+                  // backgroundColor: '#yourColor',
+                  // primaryFontColor: '#yourColor',
+                  // secondaryFontColor: '#yourColor',
+                  // fontFamily: 'yourFont'
+                },
                 onValidStateChange: (isValid) => {
                   console.log(isValid);
                   console.log(nb.tx);
@@ -122,8 +142,8 @@ internal final class WidgetViewController: UIViewController {
                     transaction: nb.tx
                   });
                 },
-                transactionTypeAllowed: '\(configuration.transactionTypeAllowed.rawValue)',
-                nonCustodialDeclarationType: '\(configuration.nonCustodialDeclarationType.rawValue)',
+                transactionTypeAllowed: 'ALL',
+                nonCustodialDeclarationType: 'DECLARATION',
               });
               
               // Store reference to nb for later use
@@ -146,11 +166,19 @@ internal final class WidgetViewController: UIViewController {
             #container {
               width: 100%;
               height: 100%;
+              padding: 20;
+              margin: 0 auto;
+              position: relative;
+              overflow-y: auto;
+              -webkit-overflow-scrolling: touch;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              background-color: \((configuration.theme == "dark") ? "#2D2D2D" : "#FFFFFF");
             }
           </style>
         </head>
         <body>
-            <p>Hello</p>
           <div id="container"></div>
         </body>
         </html>
@@ -171,7 +199,7 @@ internal final class WidgetViewController: UIViewController {
     }
     
     /// Set transaction data for the widget
-    func setTransaction(_ transaction: TransactionData) {
+    func setTransaction(_ transaction: TransactionData_NT) {
         self.currentTransaction = transaction
         
         // Only execute JavaScript if the webView is fully ready
@@ -194,7 +222,7 @@ internal final class WidgetViewController: UIViewController {
     }
     
     // Extract the JavaScript execution to a separate method
-    private func applyTransactionToWidget(_ transaction: TransactionData) {
+    private func applyTransactionToWidget(_ transaction: TransactionData_NT) {
         print("NotaBene: Applying transaction to widget")
         let js = """
         if (window.notabeneInstance) {
@@ -233,14 +261,32 @@ extension WidgetViewController: WKNavigationDelegate {
 // MARK: - WKScriptMessageHandler
 extension WidgetViewController: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        print("NotaBene: Received message from widget JavaScript")
-        if message.name == "notabeneCallback", let messageBody = message.body as? [String: Any] {
-            if let isValid = messageBody["isValid"] as? Bool {
-                let transaction = messageBody["transaction"] as? [String: Any]
-                print("NotaBene: Widget validation state changed - isValid: \(isValid)")
-                DispatchQueue.main.async {
-                    self.onValidStateChange?(isValid, transaction)
+        if message.name == "notabeneCallback" {
+            if let jsonString = message.body as? String {
+                print("Notabene Response (raw): \(jsonString)")
+                if let data = jsonString.data(using: .utf8) {
+                    do {
+                        let parsedResponse = try JSONSerialization.jsonObject(with: data, options: [])
+                        print("Notabene Response (parsed): \(parsedResponse)")
+                        // Safely check if the isValid property exists and is true
+                        if let jsonDict = parsedResponse as? [String: Any],
+                           let isValid = jsonDict["isValid"] as? Bool,
+                           isValid {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                self.dismiss(animated: true) {
+                                    //self.delegate?.responce(executed: parsedResponse)
+                                    self.onValidStateChange?(isValid, parsedResponse)
+                                }
+                            }
+                        }
+                    } catch {
+                        print("Notabene Response (parsing error): \(error)")
+                    }
+                } else {
+                    print("Notabene Response (couldn't convert to data)")
                 }
+            } else {
+                print("Notabene Response (unexpected format): \(message.body)")
             }
         }
     }
