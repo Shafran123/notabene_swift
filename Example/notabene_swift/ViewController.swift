@@ -36,16 +36,19 @@ class ViewController: UIViewController {
     @objc private func launchWidget() {
         // Create configuration
         let config = NotaBeneConfiguration(
-            widgetUrl: "https://beta-widget.notabene.dev", 
-            vaspDID: "YOUR_VASP_DID",
-            authToken: "YOUR_AUTH_TOKEN"
+            widgetUrl: "WIDGET_URL",
+            vaspDID: "VASP_DID",
+            authToken: "AUTH_TOKEN",
+            theme: "dark",
+            primaryColor: "green"
+            
         )
         
         // Optional: Create transaction data
-        let transaction = TransactionData(
-            transactionAsset: "eth",
-            beneficiaryAccountNumber: "YOUR_ACCOUNT_NUMBER",
-            transactionAmount: "1500000000000000000000"
+        let transaction = TransactionData_NT(
+            transactionAsset: "ASSET",
+            beneficiaryAccountNumber: "ADDRESS",
+            transactionAmount: "AMOUNT"
         )
         
         // Initialize and present widget
