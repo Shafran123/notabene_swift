@@ -12,7 +12,7 @@ public struct NotaBeneConfiguration {
     public let authToken: String
     
     /// Transaction type allowed for this session
-    public let transactionTypeAllowed: TransactionType
+    public let transactionTypeAllowed: TransactionType_NT
     
     /// Non-custodial declaration type
     public let nonCustodialDeclarationType: DeclarationType
@@ -20,14 +20,21 @@ public struct NotaBeneConfiguration {
     /// Customizable dictionary for localizations
     public let dictionary: [String: String]?
     
+    public let theme: String
+    
+    public let primaryColor: String
+    
+    
     /// Initializer with required parameters and optional configurations
     public init(
         widgetUrl: String,
         vaspDID: String,
         authToken: String,
-        transactionTypeAllowed: TransactionType = .all,
+        transactionTypeAllowed: TransactionType_NT = .all,
         nonCustodialDeclarationType: DeclarationType = .declaration,
-        dictionary: [String: String]? = nil
+        dictionary: [String: String]? = nil,
+        theme: String,
+        primaryColor: String
     ) {
         self.widgetUrl = widgetUrl
         self.vaspDID = vaspDID
@@ -35,11 +42,13 @@ public struct NotaBeneConfiguration {
         self.transactionTypeAllowed = transactionTypeAllowed
         self.nonCustodialDeclarationType = nonCustodialDeclarationType
         self.dictionary = dictionary
+        self.theme = theme
+        self.primaryColor = primaryColor
     }
 }
 
 /// Transaction type options
-public enum TransactionType: String {
+public enum TransactionType_NT: String {
     case all = "ALL"
     case selfTransactionOnly = "SELF_TRANSACTION_ONLY"
     case vaspToVaspOnly = "VASP_2_VASP_ONLY"
