@@ -24,6 +24,7 @@ public struct NotaBeneConfiguration {
     
     public let primaryColor: String
     
+    public let logoURL: String
     
     /// Initializer with required parameters and optional configurations
     public init(
@@ -34,7 +35,8 @@ public struct NotaBeneConfiguration {
         nonCustodialDeclarationType: DeclarationType = .declaration,
         dictionary: [String: String]? = nil,
         theme: String,
-        primaryColor: String
+        primaryColor: String,
+        logoURL: String
     ) {
         self.widgetUrl = widgetUrl
         self.vaspDID = vaspDID
@@ -44,6 +46,7 @@ public struct NotaBeneConfiguration {
         self.dictionary = dictionary
         self.theme = theme
         self.primaryColor = primaryColor
+        self.logoURL = logoURL
     }
 }
 
