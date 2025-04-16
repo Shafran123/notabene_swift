@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'notabene_swift'
-  s.version          = '0.1.0'
+  s.version          = '0.0.4'
   s.summary          = 'A Swift package for integrating the Notabene widget.'
 
 # This description is used to generate tags and improve search results.
@@ -26,7 +26,7 @@ It handles configuration, presentation, and communication with the widget.
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Shafran123' => 'mshafran13@gmail.com' }
-  s.source           = { :git => 'https://github.com/Shafran123/notabene_swift', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/Shafran123/notabene_swift/', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '14.0'
