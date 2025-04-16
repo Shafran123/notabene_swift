@@ -17,7 +17,7 @@ public final class NotaBeneSwift {
     private weak var widgetViewController: WidgetViewController?
     
     /// Callback for when the widget state changes
-    private var onValidStateChangeHandler: ((Bool, [String: Any]?) -> Void)?
+    private var onValidStateChangeHandler: ((Bool, Any?) -> Void)?
     
     // MARK: - Public API
     
@@ -31,7 +31,7 @@ public final class NotaBeneSwift {
         with configuration: NotaBeneConfiguration,
         transaction: TransactionData? = nil,
         presentingViewController: UIViewController,
-        onValidStateChange: ((Bool, [String: Any]?) -> Void)? = nil
+        onValidStateChange: ((Bool, Any?) -> Void)? = nil
     ) {
         self.onValidStateChangeHandler = onValidStateChange
         
@@ -50,7 +50,7 @@ public final class NotaBeneSwift {
         if let navController = presentingViewController.navigationController {
             navController.pushViewController(widgetVC, animated: true)
         } else {
-            widgetVC.modalPresentationStyle = .fullScreen
+            widgetVC.modalPresentationStyle = .pageSheet
             presentingViewController.present(widgetVC, animated: true)
         }
     }
