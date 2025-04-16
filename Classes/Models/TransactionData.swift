@@ -1,7 +1,7 @@
 import Foundation
 
 /// Transaction data model
-public struct TransactionData {
+public struct TransactionData_NT {
     /// Asset type (e.g. "eth", "btc")
     public let transactionAsset: String
     
