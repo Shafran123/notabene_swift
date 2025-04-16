@@ -29,7 +29,7 @@ public final class NotaBeneSwift {
     ///   - onValidStateChange: Optional callback for when validation state changes
     public func initialize(
         with configuration: NotaBeneConfiguration,
-        transaction: TransactionData? = nil,
+        transaction: TransactionData_NT? = nil,
         presentingViewController: UIViewController,
         onValidStateChange: ((Bool, Any?) -> Void)? = nil
     ) {
@@ -57,7 +57,7 @@ public final class NotaBeneSwift {
     
     /// Set or update transaction data
     /// - Parameter transaction: The transaction data to set
-    public func setTransaction(_ transaction: TransactionData) {
+    public func setTransaction(_ transaction: TransactionData_NT) {
         widgetViewController?.setTransaction(transaction)
     }
     
