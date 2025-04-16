@@ -56,7 +56,7 @@ internal final class WidgetViewController: UIViewController {
         
         // Create WebView with configuration
         webView = WKWebView(frame: view.bounds, configuration: config)
-        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webView.translatesAutoresizingMaskIntoConstraints = false
         webView.navigationDelegate = self
         
         // Add WebView to the view hierarchy
@@ -93,7 +93,7 @@ internal final class WidgetViewController: UIViewController {
         } else {
             // Fallback on earlier versions
         }
-        let baseURL = URL(string: "https://beta-widget.notabene.id")
+        let baseURL = URL(string: configuration.widgetUrl)
         webView.loadHTMLString(html, baseURL: baseURL)
     }
     
@@ -126,13 +126,15 @@ internal final class WidgetViewController: UIViewController {
                 },
                 theme: {
                   mode: '\(configuration.theme)',
-                  // primaryColor: '\(configuration.primaryColor)'
+                  primaryColor: '\(configuration.primaryColor)',
+                  logo: '\(configuration.logoURL)'
                   // You can also customize other theme elements if needed:
                   // secondaryColor: '#yourColor',
                   // backgroundColor: '#yourColor',
                   // primaryFontColor: '#yourColor',
                   // secondaryFontColor: '#yourColor',
                   // fontFamily: 'yourFont'
+                
                 },
                 onValidStateChange: (isValid) => {
                   console.log(isValid);
@@ -162,6 +164,7 @@ internal final class WidgetViewController: UIViewController {
               padding: 0;
               width: 100%;
               height: 100%;
+              background-color: \((configuration.theme == "dark") ? "#2D2D2D" : "#FFFFFF");
             }
             #container {
               width: 100%;
