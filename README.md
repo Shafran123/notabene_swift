@@ -16,7 +16,7 @@ NotaBene Swift provides a clean integrating the Notabene widget into iOS applica
 
 ## Installation
 
-NotaBene Swift is available through [CocoaPods](https://cocoapods.org). To install it, simply add the following line to your Podfile:
+NotaBene Swift is available through [CocoaPods](https://cocoapods.org). To install it, simply add the following line to your Podfile: 
 
 ```ruby
 pod 'notabene_swift'
