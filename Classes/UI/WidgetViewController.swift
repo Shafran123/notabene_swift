@@ -33,14 +33,19 @@ internal final class WidgetViewController: UIViewController {
     
     // MARK: - Lifecycle methods
     
+    // MARK: - Lifecycle methods
+      
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        view.backgroundColor = (configuration.theme == "dark") ? .init(red: 45/255, green: 45/255, blue: 45/255, alpha: 1) : .white
         setupWebView()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         setupJavascriptBridge()
         loadNotabeneWidget()
     }
-    
     // MARK: - Setup methods
     
     private func setupWebView() {
@@ -54,15 +59,68 @@ internal final class WidgetViewController: UIViewController {
         contentController.add(self, name: "notabeneCallback")
         config.userContentController = contentController
         
-        // Create WebView with configuration
-        webView = WKWebView(frame: view.bounds, configuration: config)
+        // Create WebView with configuration first
+        webView = WKWebView(frame: .zero, configuration: config)
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
         webView.translatesAutoresizingMaskIntoConstraints = false
         webView.navigationDelegate = self
         
-        // Add WebView to the view hierarchy
+        // Add all views before setting up constraints
         view.addSubview(webView)
+        
+        let headerView = UIView()
+        headerView.backgroundColor = .clear
+        headerView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(headerView)
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "Notabene Verification"
+        titleLabel.textAlignment = .center
+        titleLabel.font = .systemFont(ofSize: 17, weight: .semibold)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        headerView.addSubview(titleLabel)
+        
+        let backButton = UIButton(type: .system)
+        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        backButton.tintColor = (configuration.theme == "dark") ? .white : .black
+        backButton.addTarget(self, action: #selector(dismissView), for: .touchUpInside)
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        headerView.addSubview(backButton)
+        
+        // Setup constraints
+        NSLayoutConstraint.activate([
+            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            headerView.heightAnchor.constraint(equalToConstant: 60),
+            
+            backButton.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
+            backButton.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+            backButton.widthAnchor.constraint(equalToConstant: 44),
+            backButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            titleLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+            
+            webView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        
         print("NotaBene: WebView setup complete")
     }
+    
+    // Add dismiss method
+       @objc func dismissView() {
+           if let navigationController = navigationController {
+               navigationController.popViewController(animated: true)
+           } else {
+               dismiss(animated: true)
+           }
+       }
     
     private func setupJavascriptBridge() {
         // Add JavaScript bridge for communication between Swift and JS
@@ -276,10 +334,12 @@ extension WidgetViewController: WKScriptMessageHandler {
                            let isValid = jsonDict["isValid"] as? Bool,
                            isValid {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                self.dismiss(animated: true) {
-                                    //self.delegate?.responce(executed: parsedResponse)
-                                    self.onValidStateChange?(isValid, parsedResponse)
-                                }
+                                self.navigationController?.popViewController(animated: true)
+                                self.onValidStateChange?(isValid, parsedResponse)
+//                                self.dismiss(animated: true) {
+//                                    //self.delegate?.responce(executed: parsedResponse)
+//                                    self.onValidStateChange?(isValid, parsedResponse)
+//                                }
                             }
                         }
                     } catch {
