@@ -75,7 +75,7 @@ internal final class WidgetViewController: UIViewController {
         view.addSubview(headerView)
         
         let titleLabel = UILabel()
-        titleLabel.text = "Notabene Verification"
+        titleLabel.text = configuration.titleText
         titleLabel.textAlignment = .center
         titleLabel.font = .systemFont(ofSize: 17, weight: .semibold)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
