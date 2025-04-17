@@ -2,6 +2,8 @@ import Foundation
 
 /// Configuration model for NotaBeneSwift
 public struct NotaBeneConfiguration {
+    public let titleText: String
+    
     /// The URL for the Notabene widget
     public let widgetUrl: String
     
@@ -28,6 +30,7 @@ public struct NotaBeneConfiguration {
     
     /// Initializer with required parameters and optional configurations
     public init(
+        titleText: String,
         widgetUrl: String,
         vaspDID: String,
         authToken: String,
@@ -38,6 +41,7 @@ public struct NotaBeneConfiguration {
         primaryColor: String,
         logoURL: String
     ) {
+        self.titleText = titleText
         self.widgetUrl = widgetUrl
         self.vaspDID = vaspDID
         self.authToken = authToken
