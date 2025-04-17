@@ -19,7 +19,7 @@ internal final class WidgetViewController: UIViewController {
     
     /// Add this property to track if the webView is ready for JavaScript execution
     private var isWebViewReady = false
-    
+    private var isDismissing = false
     // MARK: - Initialization
     
     init(configuration: NotaBeneConfiguration) {
@@ -332,16 +332,26 @@ extension WidgetViewController: WKScriptMessageHandler {
                         // Safely check if the isValid property exists and is true
                         if let jsonDict = parsedResponse as? [String: Any],
                            let isValid = jsonDict["isValid"] as? Bool,
-                           isValid {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                self.navigationController?.popViewController(animated: true)
-                                self.onValidStateChange?(isValid, parsedResponse)
-//                                self.dismiss(animated: true) {
-//                                    //self.delegate?.responce(executed: parsedResponse)
-//                                    self.onValidStateChange?(isValid, parsedResponse)
-//                                }
+                             isValid {
+                                // Prevent multiple dismiss operations
+                                guard !self.isBeingDismissed else { return }
+                                
+                                // Then dismiss after a short delay to show success state
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    // Only proceed if we haven't started dismissing yet
+                                    guard !self.isDismissing else { return }
+                                    self.isDismissing = true
+                                    
+                                    //print("Back From NB")
+                                    if let navigationController = self.navigationController {
+                                        navigationController.popViewController(animated: true)
+                                        // First call the callback to notify about the valid state
+                                        self.onValidStateChange?(isValid, parsedResponse)
+                                    } else {
+                                        self.dismiss(animated: true)
+                                    }
+                                }
                             }
-                        }
                     } catch {
                         print("Notabene Response (parsing error): \(error)")
                     }
