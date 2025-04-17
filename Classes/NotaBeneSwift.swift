@@ -48,14 +48,7 @@ public final class NotaBeneSwift {
         
         // Present the widget view controller
         if let navController = presentingViewController.navigationController {
-            //navController.pushViewController(widgetVC, animated: true)
-            widgetVC.modalPresentationStyle = .pageSheet
-            widgetVC.view.backgroundColor = .clear // Make background transparent
-            navController.present(widgetVC, animated: true)
-        } else {
-            widgetVC.modalPresentationStyle = .pageSheet
-            widgetVC.view.backgroundColor = .clear // Make background transparent
-            presentingViewController.present(widgetVC, animated: true)
+            navController.pushViewController(widgetVC, animated: true)
         }
     }
     
