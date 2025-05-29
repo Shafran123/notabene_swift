@@ -2,7 +2,7 @@ import UIKit
 import WebKit
 
 /// Internal view controller responsible for displaying the Notabene widget
-internal final class WidgetViewController: UIViewController {
+internal final class WidgetViewControllerV2: UIViewController {
     // MARK: - Properties
     
     /// The web view that will display the widget
@@ -157,105 +157,109 @@ internal final class WidgetViewController: UIViewController {
     
     /// Generate the HTML content for the widget
     private func generateWidgetHTML() -> String {
-        // Create dictionary JSON representation if available
-        let dictionaryJSON = configuration.dictionary != nil ?
-            try? JSONSerialization.data(withJSONObject: configuration.dictionary!, options: []) : nil
-        let dictionaryString = dictionaryJSON != nil ?
-            String(data: dictionaryJSON!, encoding: .utf8) ?? "{}" : "{}"
-        
         return """
         <!DOCTYPE html>
         <html lang="en">
         <head>
-          <meta charset="UTF-8" />
-          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Notabene Widget</title>
-          <script id="notabene" async src="https://unpkg.com/@notabene/javascript-sdk@1.20.0/dist/es/index.js"></script>
-          <script>
-            document.querySelector('#notabene').addEventListener('load', function () {
-              const nb = new Notabene({
-                widget: '\(configuration.widgetUrl)',
-                vaspDID: '\(configuration.vaspDID)',
-                container: '#container',
-                authToken: '\(configuration.authToken)',
-                dictionary:{
-                
-                },
-                theme: {
-                  mode: '\(configuration.theme)',
-                  primaryColor: '\(configuration.primaryColor)',
-                  logo: '\(configuration.logoURL)'
-                  // You can also customize other theme elements if needed:
-                  // secondaryColor: '#yourColor',
-                  // backgroundColor: '#yourColor',
-                  // primaryFontColor: '#yourColor',
-                  // secondaryFontColor: '#yourColor',
-                  // fontFamily: 'yourFont'
-                
-                },
-                onValidStateChange: (isValid) => {
-                  console.log(isValid);
-                  console.log(nb.tx);
-                  window.notabeneNativeCallback({
-                    isValid: isValid,
-                    transaction: nb.tx
-                  });
-                },
-                transactionTypeAllowed: 'ALL',
-                nonCustodialDeclarationType: 'DECLARATION',
-              });
-              
-              // Store reference to nb for later use
-              window.notabeneInstance = nb;
-              
-              // Set transaction data if available
-              \(currentTransaction != nil ? generateSetTransactionJS() : "")
-              
-              // Render the widget
-              nb.renderWidget();
-            });
-          </script>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
             body, html {
-              margin: 0;
-              padding: 0;
-              width: 100%;
-              height: 100%;
-              background-color: \((configuration.theme == "dark") ? "#2D2D2D" : "#FFFFFF");
-            }
-            #container {
-              width: 100%;
-              height: 100%;
-              padding: 20;
-              margin: 0 auto;
-              position: relative;
-              overflow-y: auto;
-              -webkit-overflow-scrolling: touch;
-              display: flex;
-              justify-content: center;
-              align-items: center;
               background-color: \((configuration.theme == "dark") ? "#2D2D2D" : "#FFFFFF");
             }
           </style>
         </head>
         <body>
-          <div id="container"></div>
+          <div id="output"></div>
+          
+          <script type="module">
+            // Import the Notabene class from the SDK using unpkg
+            import Notabene from 'https://unpkg.com/@notabene/javascript-sdk@next/dist/notabene.js';
+
+            // Create a new Notabene instance
+            const nbInstance = new Notabene({
+              nodeUrl: '\(configuration.widgetUrl)',
+              authToken: '\(configuration.authToken)',
+              locale: 'en',
+              theme: {
+                primaryColor: '\(configuration.primaryColor)',
+                mode: '\(configuration.theme)',
+                logo: '\(configuration.logoURL)',
+                fontFamily: 'Roboto'
+              },
+            });
+            
+            const tx = {
+              asset: '\(currentTransaction?.transactionAsset ?? "")',
+              destination: '\(currentTransaction?.beneficiaryAccountNumber ?? "")',
+              amountDecimal: \(currentTransaction?.transactionAmount ?? "0")
+            };
+
+            const options = {
+              proofs: {
+                microTransfer: {
+                  destination: '\(currentTransaction?.beneficiaryAccountNumber ?? "")',
+                  amountSubunits: 50000000000000,
+                  timeout: 86440,
+                },
+                fallbacks: ['screenshot', 'self-declaration'],
+              },
+              allowedAgentTypes: ['WALLET','VASP'],
+              allowedCounterpartyTypes: ['legal', 'natural', 'self'],
+              fields: {
+                naturalPerson: {
+                  name: true,
+                  placeOfBirth: true,
+                  countryOfResidence: true,
+                },
+                legalPerson: {
+                  name: true,
+                  lei: true,
+                  website: { optional: true },
+                },
+              },
+            };
+
+            const withdrawal = nbInstance.createWithdrawalAssist(tx, options);
+            withdrawal.mount("#output");
+
+            // Add all relevant callbacks for data handling
+            withdrawal.on('error', (error) => {
+              window.webkit.messageHandlers.notabeneCallback.postMessage(
+                JSON.stringify({
+                  type: 'error',
+                  error: error
+                })
+              );
+            });
+
+            withdrawal.on('ready', () => {
+              window.webkit.messageHandlers.notabeneCallback.postMessage(
+                JSON.stringify({
+                  type: 'ready'
+                })
+              );
+            });
+
+            withdrawal.on('close', () => {
+              window.webkit.messageHandlers.notabeneCallback.postMessage(
+                JSON.stringify({
+                  type: 'close'
+                })
+              );
+            });
+
+            withdrawal.on('complete', (transaction) => {
+                window.webkit.messageHandlers.notabeneCallback.postMessage(
+                JSON.stringify({
+                    type: 'complete',
+                    transaction: transaction
+                })
+                );
+            });
+          </script>
         </body>
         </html>
-        """
-    }
-    
-    /// Generate JavaScript to set transaction data
-    private func generateSetTransactionJS() -> String {
-        guard let transaction = currentTransaction else { return "" }
-        
-        return """
-        nb.setTransaction({
-          transactionAsset: '\(transaction.transactionAsset)',
-          beneficiaryAccountNumber: '\(transaction.beneficiaryAccountNumber)',
-          transactionAmount: '\(transaction.transactionAmount)',
-        });
         """
     }
     
@@ -305,7 +309,7 @@ internal final class WidgetViewController: UIViewController {
 }
 
 // MARK: - WKNavigationDelegate
-extension WidgetViewController: WKNavigationDelegate {
+extension WidgetViewControllerV2: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         print("NotaBene: Widget started loading")
     }
@@ -320,47 +324,85 @@ extension WidgetViewController: WKNavigationDelegate {
 }
 
 // MARK: - WKScriptMessageHandler
-extension WidgetViewController: WKScriptMessageHandler {
+extension WidgetViewControllerV2: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "notabeneCallback" {
-            if let jsonString = message.body as? String {
-                print("Notabene Response (raw): \(jsonString)")
-                if let data = jsonString.data(using: .utf8) {
-                    do {
-                        let parsedResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                        print("Notabene Response (parsed): \(parsedResponse)")
-                        // Safely check if the isValid property exists and is true
-                        if let jsonDict = parsedResponse as? [String: Any],
-                           let isValid = jsonDict["isValid"] as? Bool,
-                             isValid {
-                                // Prevent multiple dismiss operations
-                                //guard !self.isBeingDismissed else { return }
-                                
-                                // Then dismiss after a short delay to show success state
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    // Only proceed if we haven't started dismissing yet
-                                    guard !self.isDismissing else { return }
-                                    self.isDismissing = true
-                                    
-                                    //print("Back From NB")
-                                    if let navigationController = self.navigationController {
-                                        navigationController.popViewController(animated: true)
-                                        // First call the callback to notify about the valid state
-                                        self.onValidStateChange?(isValid, parsedResponse)
-                                    } else {
-                                        self.dismiss(animated: true)
-                                    }
-                                }
-                            }
-                    } catch {
-                        print("Notabene Response (parsing error): \(error)")
-                    }
-                } else {
-                    print("Notabene Response (couldn't convert to data)")
+            guard let jsonString = message.body as? String,
+                  let data = jsonString.data(using: .utf8) else {
+                print("Notabene Response (invalid format)")
+                return
+            }
+            
+            do {
+                guard let jsonDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                      let type = jsonDict["type"] as? String else {
+                    print("Notabene Response (invalid JSON structure)")
+                    return
                 }
-            } else {
-                print("Notabene Response (unexpected format): \(message.body)")
+                
+                print("Notabene Response (type: \(type)): \(jsonDict)")
+                switch type {
+                case "error":
+                    if let error = jsonDict["error"] as? [String: Any] {
+                        print("Error occurred: \(error)")
+                        NotificationCenter.default.post(name: NSNotification.Name("NotabeneError"),
+                                                      object: nil,
+                                                      userInfo: ["error": error])
+                    }
+                case "ready":
+                    print("Widget is ready")
+                case "close":
+                    print("Widget is closing")
+                case "complete":
+                    if let transaction = jsonDict["transaction"] as? [String: Any] {
+                        handleValidStateChange(transaction)
+                    }
+                default:
+                    print("Unknown message type: \(type)")
+                }
+            } catch {
+                print("Notabene Response (parsing error): \(error)")
             }
         }
     }
-} 
+    
+    private func handleValidStateChange(_ transaction: [String: Any]) {
+       
+        guard let response = transaction["response"] as? [String: Any],
+              let value = response["value"] as? [String: Any] else {
+            print("Could not extract response.value from transaction")
+            return
+            
+        }
+           
+        print("Transaction value data: \(value)")
+        
+        // Prevent multiple dismiss operations
+        //guard !self.isBeingDismissed else { return }
+        
+        // Call the callback to notify about the valid state
+        self.onValidStateChange?(true, value)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            // Only proceed if we haven't started dismissing yet
+            guard !self.isDismissing else { return }
+            self.isDismissing = true
+            
+            if let navigationController = self.navigationController {
+                navigationController.popViewController(animated: true)
+            } else {
+                self.dismiss(animated: true)
+            }
+        }
+    }
+    
+    private func handleClose() {
+        guard !self.isBeingDismissed && !self.isDismissing else { return }
+        self.isDismissing = true
+        
+        if let navigationController = self.navigationController {
+            navigationController.popViewController(animated: true)
+        } else {
+            self.dismiss(animated: true)
+        }
+    }
+}

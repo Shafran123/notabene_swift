@@ -26,6 +26,8 @@ public struct NotaBeneConfiguration {
     
     public let primaryColor: String
     
+    public let secondaryColor: String
+    
     public let logoURL: String
     
     /// Initializer with required parameters and optional configurations
@@ -39,6 +41,7 @@ public struct NotaBeneConfiguration {
         dictionary: [String: String]? = nil,
         theme: String,
         primaryColor: String,
+        secondaryColor: String,
         logoURL: String
     ) {
         self.titleText = titleText
@@ -50,6 +53,7 @@ public struct NotaBeneConfiguration {
         self.dictionary = dictionary
         self.theme = theme
         self.primaryColor = primaryColor
+        self.secondaryColor = secondaryColor
         self.logoURL = logoURL
     }
 }
