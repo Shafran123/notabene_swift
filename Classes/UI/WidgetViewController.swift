@@ -171,7 +171,7 @@ internal final class WidgetViewController: UIViewController {
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>Notabene Widget</title>
-          <script id="notabene" async src="https://unpkg.com/@notabene/javascript-sdk@1.20.0/dist/es/index.js"></script>
+          <script id="notabene" async src="https://unpkg.com/@notabene/javascript-sdk@1.35.2/dist/es/index.js"></script>
           <script>
             document.querySelector('#notabene').addEventListener('load', function () {
               const nb = new Notabene({
@@ -179,6 +179,7 @@ internal final class WidgetViewController: UIViewController {
                 vaspDID: '\(configuration.vaspDID)',
                 container: '#container',
                 authToken: '\(configuration.authToken)',
+                counterpartyManualEntry: false,
                 dictionary:{
                 
                 },
