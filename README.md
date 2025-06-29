@@ -3,6 +3,7 @@
 [![Version](https://img.shields.io/cocoapods/v/notabene_swift.svg?style=flat)](https://cocoapods.org/pods/notabene_swift)
 [![License](https://img.shields.io/cocoapods/l/notabene_swift.svg?style=flat)](https://cocoapods.org/pods/notabene_swift)
 [![Platform](https://img.shields.io/cocoapods/p/notabene_swift.svg?style=flat)](https://cocoapods.org/pods/notabene_swift)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/Shafran123/notabene_swift?utm_source=oss&utm_medium=github&utm_campaign=Shafran123%2Fnotabene_swift&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 ## Overview
 
